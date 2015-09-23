@@ -1,19 +1,34 @@
 class Square(object):
-  # Returns a Square object whose letter position is *letter* and number position is *number*, an is either occupied or not by a chess piece.
+  # Returns a Square object.
   def __init__(self, letter, number, piece = None):
     self.letter = letter
     self.number = number
     self.position = [letter, number]
     self.piece = piece
 
-class ChessBoard:
+  # Returns the color of the piece occupying a square.
+  def occupied(self):
+    if self.piece != None:
+      return self.piece.color
+    else:
+      return False
+  
+  # Returns True if square is empty.
+  def empty(self):
+    if self.piece == None:
+      return True
+    else:
+      return False
 
+
+class ChessBoard:
   # Creates a chessboard.
   def __init__(self):
     letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
     numbers = [1,2,3,4,5,6,7,8]
     squares = [] # Array representing all the squares on the board.
-
+  
+  # Creates 64 empty squares.  
     for letter in letters:
       for number in numbers:
         squares.append(Square(letter, number, None))
@@ -24,9 +39,11 @@ class ChessBoard:
     for square in self.squares:
       for piece in pieces:
         if (square.position == piece.currentPosition):
-            square.piece = piece
 
-  # Returns the empty squares on the board.
+            square.piece = piece # Sets the square's piece.
+            piece.currentPosition = square # Set's the piece's square.
+
+  # Returns the empty squares on the board and keeps track of occupied squares.
   def empty_squares(self):
     emptySquares = []
     for square in self.squares:
@@ -34,103 +51,91 @@ class ChessBoard:
         emptySquares.append(square.position)
     return emptySquares
 
-  def possibleMoves(self, pieces):
-    for piece in pieces:
-      #piece.possiblemoves()
 
 class ChessPiece(object):
-  def __init__(self, color):
+  # Returns a chess piece object with a color and a current position.
+  def __init__(self, color, currentPosition):
     self.color = color
-
-
-class King(ChessPiece):
-  def __init__(self, currentPosition):
     self.currentPosition = currentPosition
-   
-  #def possiblemoves(self):
-    
-    
+    self.letter = currentPosition[0]
+    self.number = currentPosition[1]
+    self.possibleMoves = []
 
-class Queen(ChessPiece):
-  def __init__(self, currentPosition):
-    self.currentPosition = currentPosition
-
-class Rook(ChessPiece):
-  def __init__(self, currentPosition):
-    self.currentPosition = currentPosition
-
-class Bishop(ChessPiece):
-  def __init__(self, currentPosition):
-    self.currentPosition = currentPosition
-
-class Knight(ChessPiece):
-  def __init__(self, currentPosition):
-    self.currentPosition = currentPosition
+  # Prints the possible moves of a piece in a formatted string.
+  def printMoves(self):
+    for move in self.possibleMoves:
+      print("Rook at <" + self.letter + ":" + str(self.number) + "> can move to <" + move[0] + ":" +str(move[1]) +">")
 
 class Pawn(ChessPiece):
-  def __init__(self, currentPosition):
-    self.currentPosition = currentPosition
+  def possible_moves(self, chessBoard):  
+    
+    # White pieces can only move towards higher number positions.
+    if self.color == "White":
+      up = [self.letter, self.number + 1]
+      twoUp = [self.letter, self.number + 2]
+      rightUp = [chr(ord(self.letter) + 1), self.number + 1]
+      leftUp = [chr(ord(self.letter) - 1), self.number + 1]
+    
+    # Black pieces can only move towards lower number positions.
+    if self.color == "Black":
+      up = [self.letter, self.number - 1]
+      twoUp = [self.letter, self.number - 2]
+      rightUp = [chr(ord(self.letter) - 1), self.number -1]
+      leftUp = [chr(ord(self.letter) + 1), self.number - 1]
+
+    for square in chessBoard.squares:
+
+      # Can move up if square is empty.
+      if square.position == up and square.empty():
+        self.possibleMoves.append(square.position)
+
+      # Can move diagonal if it is occupied by opponent's piece.
+      if (square.position == rightUp) and ((square.occupied() != False) and (square.occupied() != self.color)):
+        print(square.occupied())
+        self.possibleMoves.append(square.position)
+      if (square.position == leftUp) and ((square.occupied() != False) and (square.occupied() != self.color)):
+        print(square.occupied())
+        self.possibleMoves.append(square.position)
+
+    self.printMoves()
+
+
+class Rook(ChessPiece):
+  def possible_moves(self, chessBoard, currentSquare):
+
+    for square in chessBoard.squares:
+
+      # Can move up if square is empty
+      if square.position == [currentSquare.letter, currentSquare.number + 1] and square.empty():
+        self.possibleMoves.append(square.position)
+        self.possible_moves(chessBoard, square)
+
+      # Can move up if it is occupied by opponent's piece.
+      elif square.position == [currentSquare.letter, currentSquare.number + 1] and (square.occupied() != self.color):
+        self.possibleMoves.append(square.position)
+
+    self.printMoves()
 
 
 
-def Game(configuration):
+   
+
+
+def playChess(configuration):
   board = ChessBoard()
   board.setup(configuration)
-  board.possibleMoves(configuration)
 
-  empty = board.empty_squares()
-  print(empty)
+  for piece in configuration:
+    piece.possible_moves(board, piece.currentPosition)
 
 def main():
 
   # Initializes chess pieces
-  wKing = King(["E", 1])
-  wQueen = Queen(["D", 1])
-  wRook1 = Rook(["A", 1])
-  wRook2 = Rook(["H", 1])
-  wBishop1 = Bishop(["F", 1])
-  wBishop2 = Bishop(["F", 1])
-  wKnight1 = Knight(["B", 1])
-  wKnight2 = Knight(["G", 1])
-  wPawn1 = Pawn(["A",2])
-  wPawn2 = Pawn(["B",2])
-  wPawn3 = Pawn(["C",2])
-  wPawn4 = Pawn(["D",2])
-  wPawn5 = Pawn(["E",2])
-  wPawn6 = Pawn(["F",2])
-  wPawn7 = Pawn(["G",2])
-  wPawn8 = Pawn(["H",2])
+  rook1 = Rook("White", ["G",2])
+  rook2 = Rook("Black", ["G",6])
+  # Testing with one piece on the board.
+  configuration = [rook1, rook2]
 
-  bKing = King(["E", 8])
-  bQueen = Queen(["D", 8])
-  bRook1 = Rook(["A", 8])
-  bRook2 = Rook(["H", 8])
-  bBishop1 = Bishop(["C", 8])
-  bBishop2 = Bishop(["F", 8])
-  bKnight1 = Knight(["B", 8])
-  bKnight2 = Knight(["G", 8])
-  bPawn1 = Pawn(["A",7])
-  bPawn2 = Pawn(["B",7])
-  bPawn3 = Pawn(["C",7])
-  bPawn4 = Pawn(["D",7])
-  bPawn5 = Pawn(["E",7])
-  bPawn6 = Pawn(["F",7])
-  bPawn7 = Pawn(["G",7])
-  bPawn8 = Pawn(["H",7])
-
-  player1 = [wKing]
-  player2 = [bKing] 
-
-  # Setting the color of the piece.
-  for piece in player1:
-    piece.color = "White"
-    
-  for piece in player2: 
-    piece.color = "Black"
-
-  # Testing with two pieces on the board.
-  configuration = [wKing, bKing]
-
-  Game(configuration)
+  playChess(configuration)
 
 main()
