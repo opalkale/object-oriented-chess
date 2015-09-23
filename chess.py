@@ -41,7 +41,7 @@ class ChessBoard:
         if (square.position == piece.currentPosition):
 
             square.piece = piece # Sets the square's piece.
-            piece.currentPosition = square # Set's the piece's square.
+            piece.currentPosition = square # Sets the piece's square.
 
   # Returns the empty squares on the board.
   def empty_squares(self):
@@ -104,16 +104,21 @@ class Pawn(ChessPiece):
 
       # Can move up if square is empty.
       if square.position == up and square.empty():
-        self.possibleMoves.append(square.position)
+        up_square = square.position
+        self.possibleMoves.append(up_square)
+
+      # Can move up two squares iff the square behind it is also empty.
+      for move in self.possibleMoves:
+        if (move == up_square) and square.position == twoUp and square.empty():
+          self.possibleMoves.append(square.position)
 
       # Can move diagonal if it is occupied by opponent's piece.
       if (square.position == rightUp) and ((square.occupied() != False) and (square.occupied() != self.color)):
-        print(square.occupied())
-        self.possibleMoves.append(square.position)
-      if (square.position == leftUp) and ((square.occupied() != False) and (square.occupied() != self.color)):
-        print(square.occupied())
         self.possibleMoves.append(square.position)
 
+      if (square.position == leftUp) and ((square.occupied() != False) and (square.occupied() != self.color)):
+        self.possibleMoves.append(square.position)
+    
     self.print_move("Pawn")
 
 
@@ -129,6 +134,7 @@ class Rook(ChessPiece):
     self.move_udlr(chessBoard, currentSquare, True)
     self.print_move("Rook")
 
+
 class Bishop(ChessPiece):
   # Bishop may move diagonal in all directions.
   def move_diagonal(self, chessBoard, currentSquare, repeat = None):
@@ -143,7 +149,7 @@ class Bishop(ChessPiece):
 
 
 class Knight(ChessPiece):
-  # Knight may move in an L-shape in all directions, only once.
+  # Knight may move in an L-shape in all directions for one square only.
   def possible_moves(self, chessBoard, currentSquare):
     self.move(chessBoard, currentSquare, 2, 1)
     self.move(chessBoard, currentSquare, 2, -1)
@@ -172,21 +178,70 @@ class King(Rook, Bishop):
     self.print_move("King")
 
 
-def playChess(configuration):
-  board = ChessBoard()
-  board.setup(configuration)
+# Calls all the possible plays for a given player's pieces. 
+def playChess(configuration, player):
+  board = ChessBoard() # Initializes a board.
+  board.setup(configuration) # Sets up board wih a given configuration.
 
-  for piece in configuration:
-    piece.possible_moves(board, piece.currentPosition)
+  for piece in configuration: 
+    if piece.color == player:
+      piece.possible_moves(board, piece.currentPosition)
+
 
 def main():
- # Initializes chess piece.
- pawn_white = Pawn("Pawn", ["D",2]) 
- pawn_white.color = "White"
- pawn_black = Pawn("Pawn", ["E", 3])
- pawn_black.color = "Black"
+  # Initializes chess piece and color.
+  whitePlayer = [
 
- configuration = [pawn_white, pawn_black] # Testing with two pieces on the board.
- playChess(configuration)
+    Pawn("White", ["A", 2]),
+    Pawn("White", ["B", 2]),
+    Pawn("White", ["C", 2]),
+    Pawn("White", ["D", 2]),
+    Pawn("White", ["E", 2]),
+    Pawn("White", ["F", 2]),
+    Pawn("White", ["G", 2]),
+    Pawn("White", ["H", 2]),
+    Knight("White", ["B", 1]),
+    Knight("White", ["G", 1]),
+    Bishop("White", ["F", 1]),
+    Bishop("White", ["C", 1]),
+    Rook("White", ["A", 1]),
+    Rook("White", ["H", 1]),
+    Queen("White", ["D", 1]),
+    King("White", ["E", 1])
+
+    ]
+
+  for piece in whitePlayer:
+    piece.color = "White"
+
+  blackPlayer = [
+
+    Pawn("Black", ["A", 7]),
+    Pawn("Black", ["B", 7]),
+    Pawn("Black", ["C", 7]),
+    Pawn("Black", ["D", 7]),
+    Pawn("Black", ["E", 7]),
+    Pawn("Black", ["F", 7]),
+    Pawn("Black", ["G", 7]),
+    Pawn("Black", ["H", 7]),
+    Knight("Black", ["B", 8]),
+    Knight("Black", ["G", 8]),
+    Bishop("Black", ["F", 8]),
+    Bishop("Black", ["C", 8]),
+    Rook("Black", ["A", 8]),
+    Rook("Black", ["H", 8]),
+    Queen("Black", ["D", 8]),
+    King("Black", ["E", 8])
+
+    ]
+
+  for piece in blackPlayer:
+    piece.color = "Black"
+
+  initialState = whitePlayer + blackPlayer # Testing with the initial state on the chessboard.
+  player = "White"
+  playChess(initialState, player)
+
+
 
 main()
