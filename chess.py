@@ -61,27 +61,30 @@ class ChessPiece(object):
     self.number = currentPosition[1]
     self.possibleMoves = []
 
-  # Checks if a given direction is a possible move.
-  def move(self, chessBoard, currentSquare, x, y):
+  # Checks if a given direction x ,y is a possible move.
+  def move(self, chessBoard, currentSquare, x, y, repeat = None):
     for square in chessBoard.squares:
 
       # Can move to a given square if it is empty.
       if square.position == [chr(ord(currentSquare.letter) + x), currentSquare.number + y] and square.empty():
         self.possibleMoves.append(square.position)
-        return self.move(chessBoard, square, x, y)
+        # Repeatedly checks in a certain direction if it is a possible move for a given square.
+        if repeat == True:
+          return self.move(chessBoard, square, x, y, repeat)
 
       # Can move to a given square if it is occupied by opponent's piece.
       elif square.position == [chr(ord(currentSquare.letter) + x), currentSquare.number + y] and (square.occupied() != self.color):
         self.possibleMoves.append(square.position)
 
-  # Prints the possible moves of a piece in a formatted string.
-  def printMoves(self):
+  # Returns a formatted string of the piece's possible move.
+  def print_move(self, pieceName):
     for move in self.possibleMoves:
-      print("Queen at <" + self.letter + ":" + str(self.number) + "> can move to <" + move[0] + ":" +str(move[1]) +">")
+      format = pieceName + " at <" + self.letter + ":" + str(self.number) + "> can move to <" + move[0] + ":" +str(move[1]) +">"
+      print(format)
 
 
 class Pawn(ChessPiece):
-  def possible_moves(self, chessBoard):  
+  def possible_moves(self, chessBoard, currentSquare):
     
     # White pieces can only move towards higher number positions.
     if self.color == "White":
@@ -111,44 +114,62 @@ class Pawn(ChessPiece):
         print(square.occupied())
         self.possibleMoves.append(square.position)
 
-    self.printMoves()
+    self.print_move("Pawn")
 
 
 class Rook(ChessPiece):
   # Rook may move up, down, left, or right.
-  def move_udlr(self, chessBoard, currentSquare):
-    self.move(chessBoard, currentSquare, 0, 1)
-    self.move(chessBoard, currentSquare, 0, -1)
-    self.move(chessBoard, currentSquare, -1, 0)
-    self.move(chessBoard, currentSquare, 1, 0)
+  def move_udlr(self, chessBoard, currentSquare, repeat = None):
+    self.move(chessBoard, currentSquare, 0, 1, repeat)
+    self.move(chessBoard, currentSquare, 0, -1, repeat)
+    self.move(chessBoard, currentSquare, -1, 0, repeat)
+    self.move(chessBoard, currentSquare, 1, 0, repeat)
 
   def possible_moves(self, chessBoard, currentSquare):
-    self.move_udlr(chessBoard, currentSquare)
-
-    self.printMoves()
-
+    self.move_udlr(chessBoard, currentSquare, True)
+    self.print_move("Rook")
 
 class Bishop(ChessPiece):
   # Bishop may move diagonal in all directions.
-  def move_diagonal(self, chessBoard, currentSquare):
-    self.move(chessBoard, currentSquare, 1, 1)
-    self.move(chessBoard, currentSquare, 1, -1)
-    self.move(chessBoard, currentSquare, -1, 1)
-    self.move(chessBoard, currentSquare, -1, -1)
+  def move_diagonal(self, chessBoard, currentSquare, repeat = None):
+    self.move(chessBoard, currentSquare, 1, 1, repeat)
+    self.move(chessBoard, currentSquare, 1, -1, repeat)
+    self.move(chessBoard, currentSquare, -1, 1, repeat)
+    self.move(chessBoard, currentSquare, -1, -1, repeat)
 
   def possible_moves(self, chessBoard, currentSquare):
-    self.move_diagonal(chessBoard, currentSquare)
+    self.move_diagonal(chessBoard, currentSquare, True)
+    self.print_move("Bishop")
 
-    self.printMoves()
+
+class Knight(ChessPiece):
+  # Knight may move in an L-shape in all directions, only once.
+  def possible_moves(self, chessBoard, currentSquare):
+    self.move(chessBoard, currentSquare, 2, 1)
+    self.move(chessBoard, currentSquare, 2, -1)
+    self.move(chessBoard, currentSquare, -2, 1)
+    self.move(chessBoard, currentSquare, -2, -1)
+    self.move(chessBoard, currentSquare, 1, 2)
+    self.move(chessBoard, currentSquare, -1, 2)
+    self.move(chessBoard, currentSquare, 1, -2)
+    self.move(chessBoard, currentSquare, -1, -2)
+    self.print_move("Knight")
 
 
 class Queen(Rook, Bishop):
   # Queen may move like a Rook or a Bishop.
   def possible_moves(self, chessBoard, currentSquare):
+    self.move_diagonal(chessBoard, currentSquare, True)
+    self.move_udlr(chessBoard, currentSquare, True)
+    self.print_move("Queen")
+
+
+class King(Rook, Bishop):
+  # King may move like a Rook or a Bishop for one square only.
+  def possible_moves(self, chessBoard, currentSquare):
     self.move_diagonal(chessBoard, currentSquare)
     self.move_udlr(chessBoard, currentSquare)
-
-    self.printMoves()
+    self.print_move("King")
 
 
 def playChess(configuration):
@@ -159,8 +180,13 @@ def playChess(configuration):
     piece.possible_moves(board, piece.currentPosition)
 
 def main():
-  queen = Queen("White", ["H",1]) # Initializes chess piece.
-  configuration = [queen] # Testing with one piece on the board.
-  playChess(configuration)
+ # Initializes chess piece.
+ pawn_white = Pawn("Pawn", ["D",2]) 
+ pawn_white.color = "White"
+ pawn_black = Pawn("Pawn", ["E", 3])
+ pawn_black.color = "Black"
+
+ configuration = [pawn_white, pawn_black] # Testing with two pieces on the board.
+ playChess(configuration)
 
 main()
