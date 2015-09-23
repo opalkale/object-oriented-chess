@@ -43,7 +43,7 @@ class ChessBoard:
             square.piece = piece # Sets the square's piece.
             piece.currentPosition = square # Set's the piece's square.
 
-  # Returns the empty squares on the board and keeps track of occupied squares.
+  # Returns the empty squares on the board.
   def empty_squares(self):
     emptySquares = []
     for square in self.squares:
@@ -115,7 +115,6 @@ class Pawn(ChessPiece):
 
 
 class Rook(ChessPiece):
-
   # Rook may move up, down, left, or right.
   def move_udlr(self, chessBoard, currentSquare):
     self.move(chessBoard, currentSquare, 0, 1)
@@ -130,7 +129,6 @@ class Rook(ChessPiece):
 
 
 class Bishop(ChessPiece):
-
   # Bishop may move diagonal in all directions.
   def move_diagonal(self, chessBoard, currentSquare):
     self.move(chessBoard, currentSquare, 1, 1)
@@ -144,15 +142,13 @@ class Bishop(ChessPiece):
     self.printMoves()
 
 
-# Queen may move like a Rook or a Bishop
 class Queen(Rook, Bishop):
-
+  # Queen may move like a Rook or a Bishop.
   def possible_moves(self, chessBoard, currentSquare):
     self.move_diagonal(chessBoard, currentSquare)
     self.move_udlr(chessBoard, currentSquare)
 
     self.printMoves()
-
 
 
 def playChess(configuration):
@@ -163,12 +159,8 @@ def playChess(configuration):
     piece.possible_moves(board, piece.currentPosition)
 
 def main():
-
-  # Initializes chess pieces
-  queen = Queen("White", ["H",1])
-  # Testing with one piece on the board.
-  configuration = [queen]
-
+  queen = Queen("White", ["H",1]) # Initializes chess piece.
+  configuration = [queen] # Testing with one piece on the board.
   playChess(configuration)
 
 main()
